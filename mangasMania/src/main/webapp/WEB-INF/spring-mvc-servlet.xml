@@ -21,7 +21,7 @@
 			default-autowire="byName">
 
 	<context:component-scan base-package="com.otmanel.mangasMania.web" />
-
+	
 	<bean
 		class="org.springframework.web.servlet.view.InternalResourceViewResolver">
 		<property name="prefix">
@@ -34,7 +34,15 @@
 
 	<mvc:resources mapping="/resources/**" location="/resources/" />
 
-	<mvc:annotation-driven />
+	<mvc:annotation-driven>
+		<!--  ici on configure comment il va interpreter certains annotations specifique -->
+		<mvc:argument-resolvers>
+			<bean class="org.springframework.data.web.PageableHandlerMethodArgumentResolver"> 
+				<property name="pageParameterName" value="page" />
+				<property name="sizeParameterName" value="size" />
+			</bean>
+		</mvc:argument-resolvers>
+	</mvc:annotation-driven>
 	
 	
 

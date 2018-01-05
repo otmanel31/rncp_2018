@@ -7,6 +7,11 @@ import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
@@ -25,7 +30,6 @@ import com.otmanel.repositories.IMangasDao;
 @Controller
 @RequestMapping(value="/")
 public class IndexController {
-
 	@Autowired
 	private IMangasDao mangasDao;
 	
@@ -42,10 +46,22 @@ public class IndexController {
 		return data; 
 	}
 	
+	@RequestMapping(value="/pmangas", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody // veux dire que cette reponse ne renvoie pas une jsp mais des datas ds le corps
+	public Page<Manga> listePaginate(@PageableDefault(page=0, size=3) Pageable p){
+		return this.mangasDao.findAll(p);
+	}
+	
 	@RequestMapping(value="/mangas/search/{search:.+}", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody // veux dire que cette reponse ne renvoie pas une jsp mais des datas ds le corps
 	public List<Manga> searchManga(@PathVariable("search") String search){
 		return mangasDao.findByTitreContaining(search);
+	}
+	
+	@RequestMapping(value="/pmangas/search/{search:.+}", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody // veux dire que cette reponse ne renvoie pas une jsp mais des datas ds le corps
+	public Page<Manga> searchMangaPaginate(@PathVariable("search") String search, @PageableDefault(page=0, size=3) Pageable p){
+		return mangasDao.findByTitreContaining(search, p);
 	}
 	
 	@RequestMapping(value="/mangas", method=RequestMethod.POST, produces=MediaType.APPLICATION_JSON_VALUE)
