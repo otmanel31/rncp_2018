@@ -3,6 +3,7 @@ package com.otmanel.mangasMania.web;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.servlet.ModelAndView;
@@ -48,7 +50,10 @@ public class IndexController {
 	
 	@RequestMapping(value="/pmangas", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody // veux dire que cette reponse ne renvoie pas une jsp mais des datas ds le corps
-	public Page<Manga> listePaginate(@PageableDefault(page=0, size=3) Pageable p){
+	public Page<Manga> listePaginate(@PageableDefault(page=0, size=3) Pageable p
+			, @RequestParam("ratingMin") Optional<Integer> ratingMin){
+		if (ratingMin.isPresent()) return this.mangasDao.findByRatingGreaterThanEqual(ratingMin.get(), p);
+		
 		return this.mangasDao.findAll(p);
 	}
 	
@@ -60,7 +65,10 @@ public class IndexController {
 	
 	@RequestMapping(value="/pmangas/search/{search:.+}", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody // veux dire que cette reponse ne renvoie pas une jsp mais des datas ds le corps
-	public Page<Manga> searchMangaPaginate(@PathVariable("search") String search, @PageableDefault(page=0, size=3) Pageable p){
+	public Page<Manga> searchMangaPaginate(@PathVariable("search") String search, @PageableDefault(page=0, size=3) Pageable p
+			, @RequestParam("ratingMin") Optional<Integer> ratingMin){
+		if (ratingMin.isPresent()) return this.mangasDao.findByTitreContainingAndRatingGreaterThanEqual(search, ratingMin.get(), p);
+		
 		return mangasDao.findByTitreContaining(search, p);
 	}
 	
