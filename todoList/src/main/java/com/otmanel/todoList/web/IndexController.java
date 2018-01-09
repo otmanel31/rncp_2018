@@ -11,6 +11,9 @@ import javax.xml.ws.ResponseWrapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
 import org.springframework.http.HttpStatus;
@@ -58,6 +61,26 @@ public class IndexController {
 		ArrayList<TodoList> data = new ArrayList<>();
 		todoDao.findAll().forEach(todo -> data.add(todo));
 		return data;
+	}
+	
+	@RequestMapping(value="/ptodos",  method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public Page<TodoList> listePaginate(
+			@PageableDefault(page=0, size=3) Pageable p,
+			@RequestParam("libelle") Optional<String> libelle,
+			@RequestParam("priorite") Optional<Integer> priorite,
+			@RequestParam("dateLimite")
+			@DateTimeFormat(iso=ISO.DATE) Optional<LocalDate> dateLimite){
+
+		if (libelle.isPresent() && priorite.isPresent()) return this.todoDao.findByLibelleContainingAndPrioriteGreaterThan(libelle.get(), priorite.get(), p);
+		
+		if (libelle.isPresent()) return todoDao.findByLibelleContaining(libelle.get(), p);
+		if (priorite.isPresent()) return todoDao.findByPrioriteGreaterThan(priorite.get(), p);
+		if (dateLimite.isPresent())
+			log.info("******************************       " + dateLimite.get());
+		if (dateLimite.isPresent()) return todoDao.findByDateLimiteBefore(dateLimite.get(), p );
+		
+		return this.todoDao.findAll(p);
 	}
 	
 	@RequestMapping(value="/todos/{id:[0-9]+}", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
