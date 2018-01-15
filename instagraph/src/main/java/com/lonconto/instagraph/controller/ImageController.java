@@ -156,7 +156,10 @@ public class ImageController {
 			@RequestParam("tagsId") Optional<List<Integer>> tagsId, 
 			@PageableDefault(page=0, size=12) Pageable page){
 		
-		if (tagsId.isPresent()) log.info("tags id = " + tagsId.get().toString());
+		if (tagsId.isPresent()) {
+			log.info("tags id = " + tagsId.get().toString());
+			return this.imageRepo.searchWithTags(tagsId.get(), null, page).map(img->projectionFactory.createProjection(ImageWithTags.class, img));
+		}
 		else log.info("no tags id in parameters");
 		
 		return this.imageRepo.findAll(page).map(img-> projectionFactory.createProjection(ImageWithTags.class, img));
