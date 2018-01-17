@@ -1,4 +1,4 @@
-package com.otmanel.firstSecurity.metier;
+package com.lonconto.instagraph.metier;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -11,6 +11,7 @@ import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.lonconto.instagraph.metier.Role;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -47,3 +48,4 @@ public class User {
 	
 	
 }
+

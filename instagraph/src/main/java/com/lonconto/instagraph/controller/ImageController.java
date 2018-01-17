@@ -25,6 +25,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -60,6 +61,7 @@ public class ImageController {
 	/*@Autowired
 	private FileStorageManager fsm;*/
 	
+	@PreAuthorize("permitAll")
 	@RequestMapping(value="/download/{id:[0-9]+}", method=RequestMethod.GET)
 	@ResponseBody
 	public ResponseEntity<FileSystemResource> imageData(@PathVariable("id") long id){
@@ -80,6 +82,7 @@ public class ImageController {
 
 	}
 	
+	@PreAuthorize("permitAll")
 	@RequestMapping(value="/downloadThumb/{id:[0-9]+}", method=RequestMethod.GET)
 	@ResponseBody
 	public ResponseEntity<FileSystemResource> imageDataThumb(@PathVariable("id") long id){
@@ -100,6 +103,7 @@ public class ImageController {
 
 	}
 	
+	@PreAuthorize("hasRole('ROLE_USER')")
 	@CrossOrigin(origins="http://localhost:4200")
 	@RequestMapping(value="/upload", method=RequestMethod.POST, produces=MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
@@ -136,6 +140,7 @@ public class ImageController {
 		
 	}
 	
+	
 	@CrossOrigin(origins="http://localhost:4200")
 	@RequestMapping(value="/plistesByTags", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
@@ -149,6 +154,7 @@ public class ImageController {
 		return this.imageRepo.findAll(page);
 	}
 	
+	@PreAuthorize("hasRole('ROLE_USER')")
 	@CrossOrigin(origins="http://localhost:4200")
 	@RequestMapping(value="/plistesByTagsFull", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
@@ -168,6 +174,7 @@ public class ImageController {
 	@CrossOrigin(origins="http://localhost:4200")
 	@RequestMapping(value="delete", method=RequestMethod.DELETE, produces=MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
+	@PreAuthorize("hasRole('ROLE_ADMIN')")
 	public Map<String, Object> deleteImgs(@RequestParam("imgsId") List<Long> imgsId) {
 		Map<String, Object> result = new HashMap<>();
 		
