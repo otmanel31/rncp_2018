@@ -20,6 +20,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -55,6 +56,7 @@ public class IndexController {
 		return "bonjour";
 	}
 
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_CONTRIBUTOR', 'ROLE_VISITOR')")
 	@CrossOrigin(origins="http://localhost:4200")
 	@RequestMapping(value="/mangas", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody // veux dire que cette reponse ne renvoie pas une jsp mais des datas ds le corps
@@ -64,6 +66,7 @@ public class IndexController {
 		return data; 
 	}
 	
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_CONTRIBUTOR', 'ROLE_VISITOR')")
 	@CrossOrigin(origins="http://localhost:4200")
 	@RequestMapping(value="/pmangas", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody // veux dire que cette reponse ne renvoie pas une jsp mais des datas ds le corps
@@ -73,14 +76,14 @@ public class IndexController {
 		
 		return this.mangasDao.findAll(p);
 	}
-	
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_CONTRIBUTOR', 'ROLE_VISITOR')")
 	@CrossOrigin(origins="http://localhost:4200")
 	@RequestMapping(value="/mangas/search/{search:.+}", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody // veux dire que cette reponse ne renvoie pas une jsp mais des datas ds le corps
 	public List<Manga> searchManga(@PathVariable("search") String search){
 		return mangasDao.findByTitreContaining(search);
 	}
-	
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_CONTRIBUTOR', 'ROLE_VISITOR')")
 	@CrossOrigin(origins="http://localhost:4200")
 	@RequestMapping(value="/pmangas/search/{search:.+}", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody // veux dire que cette reponse ne renvoie pas une jsp mais des datas ds le corps
@@ -91,6 +94,7 @@ public class IndexController {
 		return mangasDao.findByTitreContaining(search, p);
 	}
 	
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_CONTRIBUTOR', 'ROLE_VISITOR')")
 	@CrossOrigin(origins="http://localhost:4200")
 	@RequestMapping(value="/download/{id:[0-9]+}", method=RequestMethod.GET)
 	@ResponseBody
@@ -112,6 +116,7 @@ public class IndexController {
 
 	}
 	
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_CONTRIBUTOR', 'ROLE_VISITOR')")
 	@CrossOrigin(origins="http://localhost:4200")
 	@RequestMapping(value="/downloadThumb/{id:[0-9]+}", method=RequestMethod.GET)
 	@ResponseBody
@@ -132,7 +137,7 @@ public class IndexController {
 		return re;
 
 	}
-	
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_CONTRIBUTOR')")
 	@CrossOrigin(origins="http://localhost:4200")
 	@RequestMapping(value="/image/upload/{idMangas:[0-9]+}", method=RequestMethod.POST, produces=MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
@@ -158,6 +163,7 @@ public class IndexController {
 		}
 	}
 	
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_CONTRIBUTOR')")
 	@CrossOrigin(origins="http://localhost:4200")
 	@RequestMapping(value="/mangas", method=RequestMethod.POST, produces=MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
@@ -178,6 +184,7 @@ public class IndexController {
 		return this.mangasDao.save(m);
 	}
 	
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_CONTRIBUTOR', 'ROLE_VISITOR')")
 	@CrossOrigin(origins="http://localhost:4200")
 	@RequestMapping(value="/mangas/{id:[0-9]+}", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
@@ -187,6 +194,7 @@ public class IndexController {
 		return m;
 	}
 	
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_CONTRIBUTOR')")
 	@CrossOrigin(origins="http://localhost:4200")
 	@RequestMapping(value="/mangas", method=RequestMethod.PUT, produces=MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
@@ -196,6 +204,7 @@ public class IndexController {
 		return this.mangasDao.save(m);
 	}
 	
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
 	@CrossOrigin(origins="http://localhost:4200")
 	@RequestMapping(value="/mangas/{id:[0-9]+}", method=RequestMethod.DELETE, produces=MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
