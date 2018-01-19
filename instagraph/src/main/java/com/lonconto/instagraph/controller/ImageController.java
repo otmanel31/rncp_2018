@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.StreamSupport;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.log4j.LogManager;
@@ -26,6 +27,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -36,9 +39,14 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.lonconto.instagraph.metier.CompositeOwnerKey;
 import com.lonconto.instagraph.metier.Image;
+import com.lonconto.instagraph.metier.Owner;
+import com.lonconto.instagraph.metier.User;
 import com.lonconto.instagraph.metier.projections.ImageWithTags;
 import com.lonconto.instagraph.repositories.ImageRepository;
+import com.lonconto.instagraph.repositories.OwnerRepository;
+import com.lonconto.instagraph.repositories.UserRepositoy;
 import com.lonconto.instagraph.util.FileStorageManager;
 
 
@@ -57,6 +65,12 @@ public class ImageController {
 	
 	@Autowired
 	private ImageRepository imageRepo;
+	
+	@Autowired
+	private UserRepositoy userRepo;
+	
+	@Autowired
+	private OwnerRepository ownerRepo;
 	
 	/*@Autowired
 	private FileStorageManager fsm;*/
@@ -107,8 +121,9 @@ public class ImageController {
 	@CrossOrigin(origins="http://localhost:4200")
 	@RequestMapping(value="/upload", method=RequestMethod.POST, produces=MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public Image upload(@RequestParam("file") MultipartFile file) {
+	public Image upload(@RequestParam("file") MultipartFile file, @AuthenticationPrincipal Authentication auth) {
 		// EN DEUX ETAPES/1/ copie/2/save en bdd
+		log.info("current user : => " + auth.getName());
 		log.info("File name: " + file.getOriginalFilename());
 		log.info("File name: " + file.getContentType());
 		
@@ -121,6 +136,10 @@ public class ImageController {
 			imageRepo.saveImageFile(img, file.getInputStream());
 			// le fichier est save et img contient kle storageid correpondantt
 			imageRepo.save(img); // ligne inseré ds la base
+			
+			User u = userRepo.findByUsername(auth.getName());
+			Owner o = new Owner(new CompositeOwnerKey(img, u));
+			ownerRepo.save(o);
 			return img;
 		}catch(IOException E) {
 			throw new HttpClientErrorException(HttpStatus.INTERNAL_SERVER_ERROR, "erreur lors de la sauvegarde");
@@ -174,14 +193,40 @@ public class ImageController {
 	@CrossOrigin(origins="http://localhost:4200")
 	@RequestMapping(value="delete", method=RequestMethod.DELETE, produces=MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
-	@PreAuthorize("hasRole('ROLE_ADMIN')")
-	public Map<String, Object> deleteImgs(@RequestParam("imgsId") List<Long> imgsId) {
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
+	public Map<String, Object> deleteImgs(@RequestParam("imgsId") List<Long> imgsId,
+			@AuthenticationPrincipal Authentication auth) {
 		Map<String, Object> result = new HashMap<>();
 		
 		Iterable<Image> imgs = imageRepo.findAll(imgsId);
-
+		final OwnerRepository ownerRepo2 = this.ownerRepo;
+		final User u = this.userRepo.findByUsername(auth.getName());
+		// ------------------------------ Controle si on a le droit ------------------------------------------
+		// in anyuMatch contient des autority sous forme de chaine de caractere fonc les roles 
+		if (!auth.getAuthorities().stream().anyMatch(a-> a.getAuthority().equals("ROLE_ADMIN"))) {
+			
+			log.info("not role admin - test if image owner");
+			
+			// splititerator decoupe stream en plusieur morceaux si utilisation en paralle etc .... pour aller plus vite
+			boolean ok = StreamSupport.stream(imgs.spliterator(), false)
+							.allMatch(img-> ownerRepo2.exists(new CompositeOwnerKey(img, u)))
+						;
+			if (!ok) throw new HttpClientErrorException(HttpStatus.FORBIDDEN, "cannot delete this image");
+			log.info("is delete ok - user is owner of image");
+		}
+		//------------------------------ end control ---------------------------------------------------------
 		// effece img en bdd
-		imageRepo.delete(imgs);
+		// pour chaque img ds imgs
+		for (Image i : imgs) {
+			// si limage a un poprio effacer lassociation dabord pour que la suppression de limage ne genere pas derreur de contrainte
+			//Owner o = ownerRepo.findOne(new CompositeOwnerKey(i, u)); // ici ruser pour le role admin puisse supprimer
+			List<Owner> os = ownerRepo.findByClef_ImageId(i.getId());
+			//if (o != null) ownerRepo.delete(o);
+			if (!os.isEmpty()) this.ownerRepo.delete(os);
+			imageRepo.delete(i);
+
+		}
+		//imageRepo.delete(imgs);
 		int nbToDelete = 0;
 		int nbFilesDeleted = 0;
 		// effece les fichier img correspondant in fileSysteme

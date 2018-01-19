@@ -4,13 +4,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.client.HttpClientErrorException;
 
@@ -42,6 +45,18 @@ public class AuthController {
 		User u = userRepo.findByUsername(user.getUsername()) ;
 		if (u != null ) return u;
 		else throw new HttpClientErrorException(HttpStatus.FORBIDDEN, "login failed with this username: " + user.getUsername());
+	}
+	
+	@CrossOrigin(origins={"http://localhost:4200"}, methods={ RequestMethod.OPTIONS, RequestMethod.POST})
+	@RequestMapping(value="/register", method=RequestMethod.POST, produces=MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+	@PreAuthorize("permitAll")
+	public User register(@RequestParam("username") String username, @RequestParam("password") String password) {
+		this.log.info("in REGISTER meth with : " + username + " " + password);
+		User u = new User(0, username, myPasswordEncoder.encode(password),true);
+		u.getRoles().add(roleRepo.findByName("ROLE_USER"));
+		u = userRepo.save(u);
+		return u;
 	}
 	
 	
