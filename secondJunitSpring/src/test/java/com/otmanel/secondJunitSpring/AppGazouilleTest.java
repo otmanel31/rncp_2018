@@ -14,6 +14,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import com.otmanel.secondJunitSpring.metier.Gazouille;
 import com.otmanel.secondJunitSpring.repositories.GazouilleDaoMock;
 import com.otmanel.secondJunitSpring.services.GazouilleService;
+import com.otmanel.secondJunitSpring.services.GazouilleService.GazouilleException;
 
 // va executer les test ds un contexte spring soit avc injection de dependance ... 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -54,5 +55,21 @@ public class AppGazouilleTest {
 		g = this.gazouilleService.readGazouille(3);
 		//assertNotNull("devrait trouver gazouille 4", g);
 		assertEquals("devrait trouvert id 4",3, g.getId());
+	}
+	
+	@Test
+	public void testPublishGazouilleCensure() {
+		String expected = "vive gazouille";
+		
+		this.gazouilleService.publish(new Gazouille(0, "vive twitter", "vive twitter"));
+		Gazouille g = this.gazouilleService.readGazouille(3);
+		assertEquals("twitter devrait etre remplacer par gazouille", expected, g.getTitre());
+		assertEquals("twitter devrait etre remplacer par gazouille", expected, g.getCorps());
+	}
+	
+	@Test(expected=GazouilleException.class)
+	public void testGazouilleNotFound() {
+		Gazouille g = this.gazouilleService.readGazouille(6);
+		
 	}
 }

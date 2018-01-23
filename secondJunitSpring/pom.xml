@@ -48,19 +48,27 @@
       <version>4.12</version>
       <scope>test</scope>
     </dependency>
+    <!-- https://mvnrepository.com/artifact/org.mockito/mockito-all -->
+	<dependency>
+		<groupId>org.mockito</groupId>
+		<artifactId>mockito-all</artifactId>
+		<version>1.10.19</version>
+		<scope>test</scope>
+	</dependency>
+    
   </dependencies>
   <build>
   	<plugins>
   		<plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.7.0</version>
-        <configuration>
-          <!-- http://maven.apache.org/plugins/maven-compiler-plugin/ -->
-          <source>1.8</source>
-          <target>1.8</target>
-        </configuration>
-      </plugin>
+	        <groupId>org.apache.maven.plugins</groupId>
+	        <artifactId>maven-compiler-plugin</artifactId>
+	        <version>3.7.0</version>
+	        <configuration>
+	          <!-- http://maven.apache.org/plugins/maven-compiler-plugin/ -->
+	          <source>1.8</source>
+	          <target>1.8</target>
+	        </configuration>
+      	</plugin>
       <plugin>
       	<artifactId>maven-surefire-plugin</artifactId>
       	<configuration>

@@ -28,7 +28,7 @@ public class GazouilleService {
 	}
 
 	public GazouilleService() {
-		this.censoror = Pattern.compile(this.CENSORED);
+		this.censoror = Pattern.compile(this.CENSORED, Pattern.CASE_INSENSITIVE);
 	}
 	
 	public Gazouille readGazouille(int id) {
@@ -48,7 +48,16 @@ public class GazouilleService {
 		public GazouilleException(String message) {
 			super(message);
 		}
-		
 	}
+
+	
+	public IGazouilleDao getGazouilleDao() {
+		return gazouilleDao;
+	}
+
+	public void setGazouilleDao(IGazouilleDao gazouilleDao) {
+		this.gazouilleDao = gazouilleDao;
+	}
+	
 	
 }
