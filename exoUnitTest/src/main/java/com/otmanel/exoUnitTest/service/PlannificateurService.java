@@ -1,5 +1,6 @@
 package com.otmanel.exoUnitTest.service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,11 +36,11 @@ public class PlannificateurService {
 	
 	public Intervention createNewIntervention(Intervention i) {
 		if (i.getDateFin().isBefore(i.getDateDebut())) throw new InterventionDatetimeError("erreur sur la date ");
-		for (Intervention i1 : i.getIntervenant().getInterventions()){
+		/*for (Intervention i1 : i.getIntervenant().getInterventions()){
 			if (i.getDateDebut().isBefore(i1.getDateFin()) || i.getDateFin().isAfter(i1.getDateDebut()))
 				throw new IntervenantNotAvailableError("l'intervenant est indisponible sur ce crenaux");
 			
-		}
+		}*/
 		List<Intervention> inters = this.interventionDao.findByDateDebutAfterAndDateDebutBeforeAndIntervenantId(i.getDateDebut().minusDays(1), i.getDateDebut().plusDays(1), i.getIntervenant().getId());
 		
 		for (Intervention inter : inters) {
@@ -51,10 +52,15 @@ public class PlannificateurService {
 		
 		return this.interventionDao.save(i);
 	}
-	
+	// non couvert par les test
 	public Intervention updateIntervention(Intervention i) {
 		if (i.getDateFin().isBefore(i.getDateDebut())) throw new InterventionDatetimeError("La date de fin ne peut etre inferieur a la date de debut");
 		return this.interventionDao.save(i);
+	}
+	
+	
+	public Page<Intervention> getInterventionProgOnMateriel(LocalDateTime dateDebut, String materiel, Pageable p) {
+		return this.interventionDao.findByDateDebutAfterAndMateriel(dateDebut, materiel, p);
 	}
 	
 	// exception custom

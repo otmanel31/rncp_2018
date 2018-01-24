@@ -24,13 +24,15 @@ public class Intervention {
 	private LocalDateTime dateFin;
 	@ManyToOne
 	private Intervenant intervenant;
+	private String materiel;
 	
-	public Intervention(int id, String lieu, LocalDateTime dateDebut, LocalDateTime dateFin) {
+	public Intervention(int id, String lieu, LocalDateTime dateDebut, LocalDateTime dateFin, String materiel) {
 		super();
 		this.id = id;
 		this.lieu = lieu;
 		this.dateDebut = dateDebut;
 		this.dateFin = dateFin;
+		this.materiel = materiel;
 	}
 	
 	
