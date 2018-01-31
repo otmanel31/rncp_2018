@@ -21,4 +21,7 @@ public class Produit {
 	private double poid;
 	private int stock;
 	private String categorie;
+	
+	
+	
 }

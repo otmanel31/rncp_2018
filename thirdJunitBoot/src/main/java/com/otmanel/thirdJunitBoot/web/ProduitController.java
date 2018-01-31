@@ -1,10 +1,15 @@
 package com.otmanel.thirdJunitBoot.web;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -34,10 +39,27 @@ public class ProduitController {
 		return this.produitDao.findByCategorie(p, categorie);
 	}
 	
+	@RequestMapping(value="/save2", method=RequestMethod.POST, produces=MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public Produit save2(@RequestBody Produit p) {
+		if(p.getPrix() < 0) p.setPrix(0.0);
+		return this.produitDao.save(p);
+	}
+	
 	@RequestMapping(value="/save", method=RequestMethod.POST, produces=MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public Produit save(@RequestBody Produit p) {
-		return this.produitDao.save(p);
+	public ResponseEntity<Object> save(@RequestBody Produit p) {
+		if(p.getPrix() < 0) p.setPrix(0.0);
+		if (p.getPoid()< 0 ) {
+			Map<String, Object> result = new HashMap<>();
+			result.put("fieldError", "poids");
+			result.put("errorMessage", "le poid ne peut etre negatif");
+			result.put("entite", p);
+			return new ResponseEntity<>(result, HttpStatus.UNPROCESSABLE_ENTITY);
+		}
+		
+		Produit prod =  this.produitDao.save(p);
+		return new ResponseEntity<Object>(p, HttpStatus.OK);
 	}
 
 }
