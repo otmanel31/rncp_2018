@@ -24,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.loncoto.instagraphform.metier.Image;
 import com.loncoto.instagraphform.util.FileStorageManager;
+import com.loncoto.instagraphform.util.GridFileStorageManager;
 
 import net.coobird.thumbnailator.Thumbnails;
 import net.coobird.thumbnailator.resizers.configurations.Antialiasing;
@@ -37,14 +38,14 @@ public class ImageRepositoryImpl implements ImageRepositoryCustom {
 	public static final int THUMB_HEIGHT = 164;
 	
 	@Autowired
-	private FileStorageManager fileStorageManager;
+	private GridFileStorageManager fileStorageManager;
 	
 	@Override
 	public boolean saveImageFile(Image img, InputStream f) {
 		//-------------------------------------
 		// sauvegarde image originale
 		//----------------------------------
-		String storageId = fileStorageManager.saveNewFile("images", f);
+		String storageId = fileStorageManager.saveNewFile("images", f, img.getFileName(), img.getContentType());
 		img.setStorageId(storageId);
 		//----------------------------------
 		// generation et sauvegarde miniature
@@ -59,7 +60,7 @@ public class ImageRepositoryImpl implements ImageRepositoryCustom {
 						.toOutputStream(bos);
 			// sauvegarde de la miniature en fichier
 			String thumbStorageId = fileStorageManager.saveNewFile("imagesThumb",
-					new ByteArrayInputStream(bos.toByteArray()));
+					new ByteArrayInputStream(bos.toByteArray()), img.getFileName(), img.getContentType());
 			// mise a jour objet image avec reference thumbnail
 			img.setThumbStorageId(thumbStorageId);
 		} catch (IOException | ArrayIndexOutOfBoundsException e) {
@@ -69,7 +70,7 @@ public class ImageRepositoryImpl implements ImageRepositoryCustom {
 	}
 
 	@Override
-	public Optional<File> getImageFile(String storageId) {
+	public Optional<InputStream> getImageFile(String storageId) {
 		return fileStorageManager.getImageFile(storageId);
 	}
 

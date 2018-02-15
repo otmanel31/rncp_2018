@@ -8,6 +8,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.data.mongodb.gridfs.GridFsTemplate;
 
+import com.otmanel.stockgeGridFs.workers.FileMongoDownloader;
 import com.otmanel.stockgeGridFs.workers.FileMongoUploader;
 
 
@@ -30,9 +31,13 @@ public class StockgeGridFsApplication implements CommandLineRunner {
 	public void run(String... args) throws Exception {
 		System.out.println("application stockage started .... ");
 		System.out.println(Arrays.toString(args));
-		if (args.length > 0 ) {
-			FileMongoUploader fmu = new FileMongoUploader(args[0], gridFsTemplate);
+		if (args.length > 1  && args[0].equalsIgnoreCase("upload")) {
+			FileMongoUploader fmu = new FileMongoUploader(args[1], gridFsTemplate);
 			fmu.run();
+		}
+		else if (args.length > 1  && args[0].equalsIgnoreCase("download")) {
+			FileMongoDownloader fmd = new FileMongoDownloader(args[1], gridFsTemplate);
+			fmd.run();
 		}
 		else {
 			System.out.println("no directory given as arg");
