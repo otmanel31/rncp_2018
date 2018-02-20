@@ -1,0 +1,2 @@
+//com.springsource.sts.config.flow.coordinates\:http\://www.springframework.org/schema/batch\:/bonjourBatch/src/main/resources/aeroport-job-batch.xml=<?xml version\="1.0" encoding\="UTF-8"?>\r\n<graph>\r\n<element clazz\="JobModelElement" type\="job">\r\n<structure end\="1485" endstart\="1473" start\="1176" startend\="1203"/>\r\n<bounds height\="118" width\="118" x\="15" y\="17"/>\r\n</element>\r\n</graph>
+eclipse.preferences.version=1
